@@ -1,0 +1,7 @@
+from .appointment_status_signals import create_default_appointment_status
+from .roles_signals import create_default_roles
+from .payment_methods_signals import create_default_payment_methods
+from .payment_status_signals import create_default_payment_status
+from .signals_tooth_condition_color import create_default_tooth_condition_colors
+from .signals_tooth_condition import create_default_tooth_conditions
+from .odontogram_signals import create_odontogram
