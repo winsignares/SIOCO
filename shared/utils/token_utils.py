@@ -1,9 +1,5 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
@@ -12,14 +8,12 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     else:
         expire = datetime.utcnow() + timedelta(days=90)
     to_encode.update({"exp": expire})
-    alg = os.getenv("ALGORITHM")
-    print(f'alg: {alg}')
-    encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY"), algorithm=os.getenv("ALGORITHM"))
+    encoded_jwt = jwt.encode(to_encode, 'f78410e69f09e4b5433b3b8b54b23449866a12c9c3cb025512a3011bcec3caae', algorithm='HS256')
     return encoded_jwt
 
 def verify_token(token: str):
     try:
-        payload = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=[os.getenv("ALGORITHM")])
+        payload = jwt.decode(token, 'f78410e69f09e4b5433b3b8b54b23449866a12c9c3cb025512a3011bcec3caae', algorithms=["HS256"])
         return payload
     except JWTError:
         return None
