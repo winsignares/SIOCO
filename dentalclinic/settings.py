@@ -105,9 +105,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:4040',
-    'https://3a67-2800-484-d685-a900-84a8-6adf-bd7e-3f6d.ngrok-free.app'
+    "http://localhost:5173",
 ]
 
 ROOT_URLCONF = 'dentalclinic.urls'
