@@ -69,6 +69,12 @@ class DecodeToken(APIView):
                 'created': token.created,
                 'token_key': token.key
             }
+            
+            Response({
+                'user_id': user_id,
+                'created': token.created,
+                'token_key': token.key
+            }, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return None
     
