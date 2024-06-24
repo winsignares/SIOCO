@@ -64,13 +64,8 @@ class DecodeToken(APIView):
             user_id = token.user.pk
             print(token.user.role)
             print(f'Debug: Token obtenido para user_id={user_id}')
-            return {
-                'user_id': user_id,
-                'created': token.created,
-                'token_key': token.key
-            }
             
-            Response({
+            return Response({
                 'user_id': user_id,
                 'created': token.created,
                 'token_key': token.key
