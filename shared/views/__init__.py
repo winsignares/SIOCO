@@ -1,1 +1,1 @@
-from .auth_views import Login
+from .auth_views import Login, DecodeToken

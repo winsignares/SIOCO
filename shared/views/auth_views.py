@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from ..serializers import AuthTokenSerializer
 from ..models import OdontologyDomain, OdontologyUser
 
@@ -50,3 +50,25 @@ class Login(APIView):
                 return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class DecodeToken(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return None
+        try:
+            token_key = auth_header.split(' ')[1]
+            token = Token.objects.get(key=token_key)
+            user_id = token.user.pk
+            print(token.user.role)
+            print(f'Debug: Token obtenido para user_id={user_id}')
+            return {
+                'user_id': user_id,
+                'created': token.created,
+                'token_key': token.key
+            }
+        except Token.DoesNotExist:
+            return None
+    

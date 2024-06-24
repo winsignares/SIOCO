@@ -21,7 +21,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', Login.as_view(), name='api_token_auth'),
+    path('', include('shared.urls')),
     path('', include('clinic.urls'))
 ]
 
