@@ -157,24 +157,24 @@ WSGI_APPLICATION = 'dentalclinic.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django_tenants.postgresql_backend',
-#         'NAME': 'os.getenv("DATABASE_NAME")',
-#         'USER': 'os.getenv("USER")',
-#         'PASSWORD': 'os.getenv("PASSWORD")',
-#         'HOST': 'os.getenv("HOST")',
-#         'PORT': 'os.getenv("PORT")',
-#     }
-# }
-
 DATABASES = {
-    'default': dj_database_url.parse(
-        os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        engine='django_tenants.postgresql_backend'
-    )
+    'default': {
+        'ENGINE': 'django_tenants.postgresql_backend',
+        'NAME': os.getenv("DATABASE_NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD': os.getenv("PASSWORD"),
+        'HOST': os.getenv("HOST"),
+        'PORT': os.getenv("PORT"),
+    }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.parse(
+#         os.environ.get("DATABASE_URL"),
+#         conn_max_age=600,
+#         engine='django_tenants.postgresql_backend'
+#     )
+# }
 
 DATABASE_ROUTERS = (
     'django_tenants.routers.TenantSyncRouter',
