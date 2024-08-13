@@ -25,3 +25,6 @@ from .password_utils import (
     verify_password,
     get_password_hash
 )
+from .superuser_utils import (
+    create_superuser_tenant
+)
