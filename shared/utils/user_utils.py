@@ -42,3 +42,22 @@ def get_user_id_from_token(request):
         return user_id
     except Token.DoesNotExist:
         return None
+
+def get_all_dentists():
+    
+    from ..models import User
+    
+    """
+    Get all the users with the role_id 2 (dentist)
+    
+    Returns:
+        All the dentists
+    """
+
+    DENTIST_ID = 2
+
+    try:
+        dentists = User.objects.get(role_id=DENTIST_ID)
+        return dentists
+    except User.DoesNotExist:
+        return []
