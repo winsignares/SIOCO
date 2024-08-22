@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import UserAppointments, Dentists
+from .views import AppointmentAPI, Dentists
 
 urlpatterns = [
-    path('appointments-u/', UserAppointments.as_view(), name='appointments'),
+    path('appointments/', AppointmentAPI.as_view(), name='appointments'),
     path('dentists/', Dentists.as_view(), name='dentists')
 ]

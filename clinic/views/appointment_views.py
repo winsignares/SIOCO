@@ -23,7 +23,8 @@ from shared.utils import (
     is_schema_valid,
 )
 
-class UserAppointments(APIView):
+
+class AppointmentAPI(APIView):
     """
     API endpoint to retrieve user appointments.
     
@@ -66,14 +67,16 @@ class UserAppointments(APIView):
     def post(self, request, *args, **kwargs):
         user_id = get_user_id_from_token(request)
         if not user_id:
-            return Response({'error': 'Invalid Token or Authorization header missing'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'error': 'Invalid Token or Authorization header missing'},
+                            status=status.HTTP_401_UNAUTHORIZED)
         
         odontology_id = get_odontology_id_from_schema()
         if not odontology_id:
             return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
         
         if not user_has_relation_with_odontology(user_id, odontology_id):
-            return Response({'error': f'User does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
+            return Response({'error': f'User does not have a relation with the Odontology with id {odontology_id}.'},
+                            status=status.HTTP_409_CONFLICT)
         
         if not is_schema_valid():
             return Response({'error': 'Cannot access data with schema public context'}, status=status.HTTP_409_CONFLICT)
@@ -89,10 +92,12 @@ class UserAppointments(APIView):
             appointment_date = data['date']
             
             if user_id != int(patient_id) and user_id != int(secretary_id):
-                return Response({'error': 'You do not have authorization to create an appointment.'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'error': 'You do not have authorization to create an appointment.'},
+                                status=status.HTTP_401_UNAUTHORIZED)
             
             if not verify_date(appointment_date):
-                return Response({'error': 'Invalid date format or the date must be in the future. Please use the format YYYY-MM-DDTHH:MM:SS'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Invalid date format or the date must be in the future. Please use the '
+                                          'format YYYY-MM-DDTHH:MM:SS'}, status=status.HTTP_400_BAD_REQUEST)
             
             if not verify_user_role(patient_id, "patient"):
                 return Response({'error': f'Patient with id {patient_id} not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -101,7 +106,7 @@ class UserAppointments(APIView):
                 return Response({'error': f'Dentist with id {dentist_id} not found'}, status=status.HTTP_404_NOT_FOUND)
             
             if not verify_user_role(secretary_id, "secretary"):
-                    return Response({'error': f'Secretary with id {secretary_id} not found'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': f'Secretary with id {secretary_id} not found'}, status=status.HTTP_404_NOT_FOUND)
             
             if not user_has_relation_with_odontology(patient_id, odontology_id):
                 return Response({'error': f'Patient does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
@@ -119,7 +124,7 @@ class UserAppointments(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
 
             dentist_appointment = Appointment.objects.get(dentist_id=dentist_id, date=appointment_date)
-
+            
             if dentist_appointment:
                 return Response({'error': 'Dentist has another appointment at same date.'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -135,7 +140,7 @@ class UserAppointments(APIView):
                 return Response({'error': 'Dentist has another appointment within 3 hours of the requested time'},
                                 status=status.HTTP_400_BAD_REQUEST)
             
-            new_appointment = Appointment.objects.create(
+            new_appointment = AppointmentAPI.objects.create(
                 patient_id=patient_id,
                 dentist_id=dentist_id,
                 date=appointment_date,
