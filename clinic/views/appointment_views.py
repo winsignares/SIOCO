@@ -111,15 +111,29 @@ class UserAppointments(APIView):
             
             if not user_has_relation_with_odontology(secretary_id, odontology_id):
                 return Response({'error': f'Secretary does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
-            
+
+            patient_appointment = Appointment.objects.get(patient_id=patient_id, date=appointment_date)
+
+            if patient_appointment:
+                return Response({'error': 'Patient has another appointment at same date.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            dentist_appointment = Appointment.objects.get(dentist_id=dentist_id, date=appointment_date)
+
+            if dentist_appointment:
+                return Response({'error': 'Dentist has another appointment at same date.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             patient_appointments = get_user_appointments(user_id=patient_id)
             dentist_appointments = get_user_appointments(user_id=dentist_id)
             
             if not verify_appointment_availability(patient_appointments, appointment_date):
-                return Response({'error': 'Patient has another appointment within 3 hours of the requested time'}, status=status.HTTP_409_CONFLICT)
+                return Response({'error': 'Patient has another appointment within 3 hours of the requested time'},
+                                status=status.HTTP_400_BAD_REQUEST)
             
             if not verify_appointment_availability(dentist_appointments, appointment_date):
-                return Response({'error': 'Dentist has another appointment within 3 hours of the requested time'}, status=status.HTTP_409_CONFLICT)
+                return Response({'error': 'Dentist has another appointment within 3 hours of the requested time'},
+                                status=status.HTTP_400_BAD_REQUEST)
             
             new_appointment = Appointment.objects.create(
                 patient_id=patient_id,

@@ -1,15 +1,8 @@
-from io import BytesIO
-
-from django.db.models import Q
-from django.db.utils import IntegrityError
-
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.parsers import JSONParser
-
-from ..models import Appointment
+from shared.serializers import UserSerializer
 
 from shared.utils import (
     get_all_dentists,
@@ -40,8 +33,11 @@ class Dentists(APIView):
         user_id = get_user_id_from_token(request)
         if not user_id:
             return Response({'error': 'Invalid Token or Authorization header missing'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
+        dentists_data = []
+
         dentists_data = get_all_dentists()
-        print(f'Dentistas obtenidos: {dentists_data}')
-        
-        return Response({'dentists': dentists_data}, status=status.HTTP_200_OK)
+        # Serializa los datos de los dentistas
+        serialized_dentists = UserSerializer(dentists_data, many=True).data
+
+        return Response({'dentists': serialized_dentists}, status=status.HTTP_200_OK)

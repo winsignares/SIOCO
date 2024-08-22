@@ -57,7 +57,7 @@ def get_all_dentists():
     DENTIST_ID = 2
 
     try:
-        dentists = User.objects.get(role_id=DENTIST_ID)
+        dentists = User.objects.filter(role_id=DENTIST_ID)
         return dentists
     except User.DoesNotExist:
         return []
