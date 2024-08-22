@@ -1,6 +1,5 @@
 from io import BytesIO
 
-from django.db.models import Q
 from django.db.utils import IntegrityError
 
 from rest_framework.views import APIView
@@ -47,17 +46,20 @@ class AppointmentAPI(APIView):
         """
         user_id = get_user_id_from_token(request)
         if not user_id:
-            return Response({'error': 'Invalid Token or Authorization header missing'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+            return Response({'error': 'Invalid Token or Authorization header missing'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
         odontology_id = get_odontology_id_from_schema()
         if not odontology_id:
             return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
-        
-        if not user_has_relation_with_odontology(user_id, odontology_id):
-            return Response({'error': f'User does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
-        
+
         if not is_schema_valid():
-            return Response({'error': 'Cannot access data with schema public context'}, status=status.HTTP_409_CONFLICT)
+            return Response({'error': 'Cannot access data with schema public context'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if not user_has_relation_with_odontology(user_id, odontology_id):
+            return Response({'error': f'User does not have a relation with the Odontology with id {odontology_id}.'},
+                            status=status.HTTP_409_CONFLICT)
         
         appointments_data = get_user_appointments(user_id)
         print(f'Debug: Appointments obtenidas: {appointments_data}')
