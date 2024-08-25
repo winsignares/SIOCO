@@ -86,7 +86,7 @@ class AppointmentAPI(APIView):
         stream = BytesIO(request.body)
         data = JSONParser().parse(stream)
         print(f'data: {data}')
-        
+
         try:
             patient_id = data['patient_id']
             dentist_id = data['dentist_id']
@@ -106,10 +106,12 @@ class AppointmentAPI(APIView):
             
             if not verify_user_role(dentist_id, "dentist"):
                 return Response({'error': f'Dentist with id {dentist_id} not found'}, status=status.HTTP_404_NOT_FOUND)
-            
-            if not verify_user_role(secretary_id, "secretary"):
-                return Response({'error': f'Secretary with id {secretary_id} not found'}, status=status.HTTP_404_NOT_FOUND)
-            
+
+            if secretary_id:
+                if not verify_user_role(secretary_id, "secretary"):
+                    return Response({'error': f'Secretary with id {secretary_id} not found'},
+                                    status=status.HTTP_404_NOT_FOUND)
+
             if not user_has_relation_with_odontology(patient_id, odontology_id):
                 return Response({'error': f'Patient does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
             
@@ -119,14 +121,20 @@ class AppointmentAPI(APIView):
             if not user_has_relation_with_odontology(secretary_id, odontology_id):
                 return Response({'error': f'Secretary does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
 
-            patient_appointment = Appointment.objects.get(patient_id=patient_id, date=appointment_date)
+            try:
+                patient_appointment = Appointment.objects.get(patient_id=patient_id, date=appointment_date)
+            except Appointment.DoesNotExist:
+                patient_appointment = False
 
             if patient_appointment:
                 return Response({'error': 'Patient has another appointment at same date.'},
                                 status=status.HTTP_400_BAD_REQUEST)
 
-            dentist_appointment = Appointment.objects.get(dentist_id=dentist_id, date=appointment_date)
-            
+            try:
+                dentist_appointment = Appointment.objects.get(dentist_id=dentist_id, date=appointment_date)
+            except Appointment.DoesNotExist:
+                dentist_appointment = False
+
             if dentist_appointment:
                 return Response({'error': 'Dentist has another appointment at same date.'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -142,7 +150,7 @@ class AppointmentAPI(APIView):
                 return Response({'error': 'Dentist has another appointment within 3 hours of the requested time'},
                                 status=status.HTTP_400_BAD_REQUEST)
             
-            new_appointment = AppointmentAPI.objects.create(
+            new_appointment = Appointment.objects.create(
                 patient_id=patient_id,
                 dentist_id=dentist_id,
                 date=appointment_date,
