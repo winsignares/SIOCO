@@ -46,6 +46,7 @@ def get_user_id_from_token(request):
 def get_all_dentists():
     
     from ..models import User
+    from shared.serializers import UserSerializer
     
     """
     Get all the users with the role_id 2 (dentist)
@@ -57,7 +58,6 @@ def get_all_dentists():
     DENTIST_ID = 2
 
     try:
-        dentists = User.objects.filter(role_id=DENTIST_ID)
-        return dentists
+        return UserSerializer(User.objects.filter(role_id=DENTIST_ID), many=True).data
     except User.DoesNotExist:
         return []
