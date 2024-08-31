@@ -11,7 +11,6 @@ from rest_framework.parsers import JSONParser
 from ..models import Appointment
 
 from shared.utils import (
-    serialize_appointment,
     verify_date,
     verify_appointment_availability,
     get_user_appointments,
@@ -21,7 +20,7 @@ from shared.utils import (
     user_has_relation_with_odontology,
     is_schema_valid,
 )
-
+from ..serializers import AppointmentSerializer
 
 class AppointmentAPI(APIView):
     """
@@ -162,4 +161,4 @@ class AppointmentAPI(APIView):
         except IntegrityError as e:
             return Response({'error': f'Integrity Error: {str(e)}'}, status=status.HTTP_409_CONFLICT)
 
-        return Response({'data': serialize_appointment(new_appointment)}, status=status.HTTP_200_OK)
+        return Response({'data': AppointmentSerializer(new_appointment, many=False).data}, status=status.HTTP_200_OK)

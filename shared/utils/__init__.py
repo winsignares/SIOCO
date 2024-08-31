@@ -8,6 +8,8 @@ from .user_utils import (
     verify_user_role,
     get_user_id_from_token,
     get_all_dentists,
+    get_dentist_pending_appointments,
+    generate_available_slots,
 )
 
 from .schema_utils import (
