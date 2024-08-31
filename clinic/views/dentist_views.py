@@ -11,6 +11,8 @@ from shared.utils import (
     get_dentist_pending_appointments,
     is_schema_valid,
     generate_available_slots,
+    get_odontology_id_from_schema,
+    user_has_relation_with_odontology,
 )
 
 class Dentists(APIView):
@@ -27,6 +29,15 @@ class DentistDetail(APIView):
         if not is_schema_valid():
             return Response({'error': 'Cannot access data with schema public context'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        odontology_id = get_odontology_id_from_schema()
+        if not odontology_id:
+            return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not user_has_relation_with_odontology(dentist_id, odontology_id):
+            return Response(
+                {'error': f'Secretary does not have a relation with the Odontology with id {odontology_id}.'},
+                status=status.HTTP_409_CONFLICT)
 
         appointments = get_dentist_pending_appointments(dentist_id)
         dates = []
