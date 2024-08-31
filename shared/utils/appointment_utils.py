@@ -3,25 +3,6 @@ from datetime import datetime
 from dateutil import parser
 import pytz
 
-def serialize_appointment(appointment):
-    """
-    Serialize the appointment object to a dictionary.
-    
-    Args:
-        appointment (Appointment): The appointment object to serialize.
-    
-    Returns:
-        dict: The serialized appointment data.
-    """
-    return {
-        'id': appointment.pk,
-        'date': appointment.date,
-        'patient': appointment.patient.username,
-        'dentist': appointment.dentist.username,
-        'secretary': appointment.secretary.username,
-        'status': appointment.status.name
-    }
-
 def verify_date(appointment_date):
     """
     Verify if the given date is valid and in the future.
@@ -71,6 +52,7 @@ def verify_appointment_availability(appointments, appointment_date):
 def get_user_appointments(user_id):
     
     from clinic.models import Appointment
+    from clinic.serializers import AppointmentSerializer
     
     """
     Retrieve the appointments for the user.
@@ -84,13 +66,4 @@ def get_user_appointments(user_id):
     appointments = Appointment.objects.filter(
         Q(patient_id=user_id) | Q(dentist_id=user_id) | Q(secretary_id=user_id)
     )
-    return [
-        {
-            'id': app.pk,
-            'date': app.date,
-            'patient': app.patient.username,
-            'dentist': app.dentist.username,
-            'secretary': app.secretary.username,
-            'status': app.status.name
-        } for app in appointments
-    ]
+    return AppointmentSerializer(appointments, many=True).data

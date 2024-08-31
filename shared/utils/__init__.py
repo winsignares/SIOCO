@@ -1,5 +1,4 @@
 from .appointment_utils import (
-    serialize_appointment,
     verify_date,
     verify_appointment_availability,
     get_user_appointments,
