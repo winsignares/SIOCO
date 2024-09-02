@@ -19,7 +19,16 @@ class Dentists(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        return Response({'dentists': UserSerializer(get_all_dentists(), many=True).data}, status=status.HTTP_200_OK)
+
+        if not is_schema_valid():
+            return Response({'error': 'Cannot access data with schema public context'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        odontology_id = get_odontology_id_from_schema()
+        if not odontology_id:
+            return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'dentists': UserSerializer(get_all_dentists(odontology_id=odontology_id), many=True).data}, status=status.HTTP_200_OK)
 
 class DentistDetail(APIView):
     permission_classes = [IsAuthenticated]

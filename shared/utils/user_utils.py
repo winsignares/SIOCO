@@ -47,9 +47,9 @@ def get_user_id_from_token(request):
     except Token.DoesNotExist:
         return None
 
-def get_all_dentists():
+def get_all_dentists(odontology_id):
     
-    from ..models import User
+    from ..models import User, OdontologyUser
     from shared.serializers import UserSerializer
     
     """
@@ -58,8 +58,10 @@ def get_all_dentists():
     Returns:
         All the dentists
     """
-
-    return UserSerializer(User.objects.filter(role_id=DENTIST_ID), many=True).data
+    return UserSerializer(User.objects.filter(
+        role_id=DENTIST_ID,
+        odontologyuser__odontology_id=odontology_id
+    ), many=True).data
 
 def get_dentist_pending_appointments(dentist_id):
 
