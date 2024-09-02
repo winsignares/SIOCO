@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import OneToOneField
 from django_tenants.models import TenantMixin, DomainMixin
 from ..utils import create_access_token
 from django.conf import settings
@@ -29,7 +30,7 @@ class Odontology(TenantMixin):
         return self.name
     
 class OdontologyDomain(DomainMixin):
-    tenant = models.ForeignKey(Odontology, related_name='domain', on_delete=models.CASCADE, unique=True)
+    tenant = models.OneToOneField(Odontology, related_name='domain', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.domain
