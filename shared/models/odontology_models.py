@@ -29,8 +29,8 @@ class Odontology(TenantMixin):
         return self.name
     
 class OdontologyDomain(DomainMixin):
-    tenant = models.ForeignKey(Odontology, related_name='domain', on_delete=models.CASCADE)
-    
+    tenant = models.ForeignKey(Odontology, related_name='domain', on_delete=models.CASCADE, unique=True)
+
     def __str__(self):
         return self.domain
     

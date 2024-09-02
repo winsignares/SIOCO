@@ -30,7 +30,7 @@ class Login(APIView):
                         odontology = {
                             'id': clinic.odontology.pk,
                             'name': clinic.odontology.name,
-                            'domains_url':  OdontologyDomainSerializer(OdontologyDomain.objects.filter(tenant_id=clinic.odontology.pk), many=True).data
+                            'domains_url':  OdontologyDomainSerializer(OdontologyDomain.objects.get(tenant_id=clinic.odontology.pk), many=False).data
                         }
                         odontologies.append(odontology)
                     
