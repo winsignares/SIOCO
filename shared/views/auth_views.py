@@ -11,6 +11,9 @@ class Login(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+
+        from ..serializers import OdontologyDomainSerializer
+
         serializer = AuthTokenSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data['username']
@@ -29,7 +32,7 @@ class Login(APIView):
                         odontology = {
                             'id': clinic.odontology.pk,
                             'name': clinic.odontology.name,
-                            'domain_url': OdontologyDomain.objects.get(tenant_id=clinic.odontology.pk).domain
+                            'domain_url': OdontologyDomainSerializer(OdontologyDomain.objects.filter(tenant_id=clinic.odontology.pk), many=True).data
                         }
                         odontologies.append(odontology)
                     
