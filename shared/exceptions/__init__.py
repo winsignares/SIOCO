@@ -1,0 +1,1 @@
+from .dentist_exceptions import DentistNotFoundException

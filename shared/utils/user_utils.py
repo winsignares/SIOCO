@@ -1,4 +1,8 @@
 from rest_framework.authtoken.models import Token
+from datetime import timedelta
+
+DENTIST_ID = 2
+PENDING_STATUS = 1
 
 def verify_user_role(user_id, role):
     
@@ -43,9 +47,10 @@ def get_user_id_from_token(request):
     except Token.DoesNotExist:
         return None
 
-def get_all_dentists():
+def get_all_dentists(odontology_id):
     
-    from ..models import User
+    from ..models import User, OdontologyUser
+    from shared.serializers import UserSerializer
     
     """
     Get all the users with the role_id 2 (dentist)
@@ -53,11 +58,48 @@ def get_all_dentists():
     Returns:
         All the dentists
     """
+    return UserSerializer(User.objects.filter(
+        role_id=DENTIST_ID,
+        odontologyuser__odontology_id=odontology_id
+    ), many=True).data
 
-    DENTIST_ID = 2
+def get_dentist_pending_appointments(dentist_id):
+
+    from clinic.serializers import AppointmentSerializer
+    from clinic.models import Appointment
+    from shared.models import User
+    from ..exceptions import DentistNotFoundException
 
     try:
-        dentists = User.objects.filter(role_id=DENTIST_ID)
-        return dentists
+        dentist = User.objects.get(pk=dentist_id, role_id=DENTIST_ID)
     except User.DoesNotExist:
-        return []
+        raise DentistNotFoundException(f'Dentists with id {dentist_id} not found.')
+
+    return AppointmentSerializer(Appointment.objects.filter(dentist_id=dentist.pk, status=PENDING_STATUS), many=True).data
+
+
+def generate_available_slots(occupied_datetimes, start_date, days=5, start_hour=8, end_hour=19):
+    available_slots = {}
+
+    for day_offset in range(days):
+        current_date = start_date + timedelta(days=day_offset)
+        available_times = []
+
+        for hour in range(start_hour, end_hour):
+            slot_time = current_date.replace(hour=hour, minute=0, second=0, microsecond=0)
+            next_slot_time = slot_time + timedelta(hours=1)
+
+            availability = True
+            for occupied in occupied_datetimes:
+                if occupied == slot_time or (slot_time <= occupied < next_slot_time):
+                    availability = False
+                    break
+
+            available_times.append({
+                'time': slot_time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+                'availability': availability
+            })
+
+        available_slots[current_date.strftime('%Y-%m-%d')] = available_times
+
+    return available_slots

@@ -3,41 +3,56 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from shared.serializers import UserSerializer
+from datetime import datetime
+import pytz
 
 from shared.utils import (
     get_all_dentists,
-    get_user_id_from_token
+    get_dentist_pending_appointments,
+    is_schema_valid,
+    generate_available_slots,
+    get_odontology_id_from_schema,
+    user_has_relation_with_odontology,
 )
 
 class Dentists(APIView):
-    """
-    API endpoint to retrieve user appointments.
-    
-    Attributes:
-        permission_classes (list): List of permissions required to access this view.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        """
-        Handle GET requests to retrieve user appointments.
-        
-        Args:
-            request: The HTTP request object.
-            *args: Additional positional arguments.
-            **kwargs: Additional keyword arguments.
-        
-        Returns:
-            Response: A response object containing the appointment data or an error message.
-        """
-        user_id = get_user_id_from_token(request)
-        if not user_id:
-            return Response({'error': 'Invalid Token or Authorization header missing'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        dentists_data = []
+        if not is_schema_valid():
+            return Response({'error': 'Cannot access data with schema public context'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        dentists_data = get_all_dentists()
-        # Serializa los datos de los dentistas
-        serialized_dentists = UserSerializer(dentists_data, many=True).data
+        odontology_id = get_odontology_id_from_schema()
+        if not odontology_id:
+            return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({'dentists': serialized_dentists}, status=status.HTTP_200_OK)
+        return Response({'dentists': UserSerializer(get_all_dentists(odontology_id=odontology_id), many=True).data}, status=status.HTTP_200_OK)
+
+class DentistDetail(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, dentist_id, *args, **kwargs):
+
+        if not is_schema_valid():
+            return Response({'error': 'Cannot access data with schema public context'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        odontology_id = get_odontology_id_from_schema()
+        if not odontology_id:
+            return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not user_has_relation_with_odontology(dentist_id, odontology_id):
+            return Response(
+                {'error': f'Secretary does not have a relation with the Odontology with id {odontology_id}.'},
+                status=status.HTTP_409_CONFLICT)
+
+        appointments = get_dentist_pending_appointments(dentist_id)
+        dates = []
+        for appointment in appointments:
+            dates.append(appointment['date'])
+
+        dates = [datetime.fromisoformat(date_str.replace("Z", "+00:00")) for date_str in dates]
+        now = datetime.now(pytz.UTC)
+        return Response({'schedule': generate_available_slots(occupied_datetimes=dates, start_date=now)}, status=status.HTTP_200_OK)
