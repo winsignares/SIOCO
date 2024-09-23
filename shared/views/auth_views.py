@@ -40,6 +40,7 @@ class Login(APIView):
 
                     token_data = {
                         'token': token.key,
+                        'user_id': user.id,
                         'odontologies': odontologies,
                         'role': user.role.name
                     }
