@@ -1,13 +1,24 @@
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
 
+SECRETARY_ID = 3
 DENTIST_ID = 2
 PENDING_STATUS = 1
 
-def verify_user_role(user_id, role):
-    
+
+def get_first_secretary():
     from ..models import User
-    
+
+    try:
+        secretary = User.objects.filter(role=SECRETARY_ID).first()
+        return secretary
+    except User.DoesNotExist:
+        return None
+
+
+def verify_user_role(user_id, role):
+    from ..models import User
+
     """
     Verify if the user exists and has the specified role.
     
@@ -23,6 +34,7 @@ def verify_user_role(user_id, role):
         return user.role.name == role
     except User.DoesNotExist:
         return False
+
 
 def get_user_id_from_token(request):
     """
@@ -47,11 +59,11 @@ def get_user_id_from_token(request):
     except Token.DoesNotExist:
         return None
 
+
 def get_all_dentists(odontology_id):
-    
     from ..models import User, OdontologyUser
     from shared.serializers import UserSerializer
-    
+
     """
     Get all the users with the role_id 2 (dentist)
     
@@ -63,8 +75,8 @@ def get_all_dentists(odontology_id):
         odontologyuser__odontology_id=odontology_id
     ), many=True).data
 
-def get_dentist_pending_appointments(dentist_id):
 
+def get_dentist_pending_appointments(dentist_id):
     from clinic.serializers import AppointmentSerializer
     from clinic.models import Appointment
     from shared.models import User
@@ -75,7 +87,8 @@ def get_dentist_pending_appointments(dentist_id):
     except User.DoesNotExist:
         raise DentistNotFoundException(f'Dentists with id {dentist_id} not found.')
 
-    return AppointmentSerializer(Appointment.objects.filter(dentist_id=dentist.pk, status=PENDING_STATUS), many=True).data
+    return AppointmentSerializer(Appointment.objects.filter(dentist_id=dentist.pk, status=PENDING_STATUS),
+                                 many=True).data
 
 
 def generate_available_slots(occupied_datetimes, start_date, days=5, start_hour=8, end_hour=19):

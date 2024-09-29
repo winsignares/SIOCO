@@ -10,6 +10,7 @@ from .user_utils import (
     get_all_dentists,
     get_dentist_pending_appointments,
     generate_available_slots,
+    get_first_secretary,
 )
 
 from .schema_utils import (

@@ -19,6 +19,7 @@ from shared.utils import (
     get_odontology_id_from_schema,
     user_has_relation_with_odontology,
     is_schema_valid,
+    get_first_secretary,
 )
 from ..serializers import AppointmentSerializer
 
@@ -85,11 +86,14 @@ class AppointmentAPI(APIView):
         stream = BytesIO(request.body)
         data = JSONParser().parse(stream)
         print(f'data: {data}')
+        try:
+            secretary_id = data['secretary_id']
+        except KeyError:
+            secretary_id = 0
 
         try:
             patient_id = data['patient_id']
             dentist_id = data['dentist_id']
-            secretary_id = data['secretary_id']
             appointment_date = data['date']
             
             if user_id != int(patient_id) and user_id != int(secretary_id):
@@ -106,19 +110,24 @@ class AppointmentAPI(APIView):
             if not verify_user_role(dentist_id, "dentist"):
                 return Response({'error': f'Dentist with id {dentist_id} not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            if secretary_id:
+            if secretary_id != 0:
                 if not verify_user_role(secretary_id, "secretary"):
                     return Response({'error': f'Secretary with id {secretary_id} not found'},
                                     status=status.HTTP_404_NOT_FOUND)
+
+                if not user_has_relation_with_odontology(secretary_id, odontology_id):
+                    return Response(
+                        {'error': f'Secretary does not have a relation with the Odontology with id {odontology_id}.'},
+                        status=status.HTTP_409_CONFLICT)
+            else:
+                secretary = get_first_secretary()
+                secretary_id = secretary.pk
 
             if not user_has_relation_with_odontology(patient_id, odontology_id):
                 return Response({'error': f'Patient does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
             
             if not user_has_relation_with_odontology(dentist_id, odontology_id):
                 return Response({'error': f'Dentist does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
-            
-            if not user_has_relation_with_odontology(secretary_id, odontology_id):
-                return Response({'error': f'Secretary does not have a relation with the Odontology with id {odontology_id}.'}, status=status.HTTP_409_CONFLICT)
 
             try:
                 patient_appointment = Appointment.objects.get(patient_id=patient_id, date=appointment_date)
