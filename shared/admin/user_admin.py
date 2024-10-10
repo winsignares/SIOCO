@@ -12,14 +12,14 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('gender', 'role', 'is_staff', 'is_active')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        (_('Personal info'), {'fields': ('email', 'first_name', 'last_name', 'gender', 'role', 'identification_card', 'url_image')}),
+        (_('Personal info'), {'fields': ('email', 'first_name', 'last_name', 'gender', 'role', 'identification_card', 'url_image', 'description')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('identification_card', 'username', 'email', 'gender', 'role', 'password1', 'password2'),
+            'fields': ('identification_card', 'username', 'email', 'description', 'gender', 'role', 'password1', 'password2'),
         }),
     )
     search_fields = ('username', 'email')

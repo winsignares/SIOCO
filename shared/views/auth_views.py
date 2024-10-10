@@ -26,30 +26,22 @@ class Login(APIView):
                 odontologies = []
 
                 print(f'user role: {user.role}')
-                if str(user.role) == "patient":
-
-                    clinics = OdontologyUser.objects.filter(user_id=user.id).select_related('odontology')
-                    for clinic in clinics:
-                        odontology = {
-                            'id': clinic.odontology.pk,
-                            'name': clinic.odontology.name,
-                            'domain_url': OdontologyDomainSerializer(
-                                OdontologyDomain.objects.filter(tenant_id=clinic.odontology.pk), many=True).data
-                        }
-                        odontologies.append(odontology)
-
-                    token_data = {
-                        'token': token.key,
-                        'user_id': user.id,
-                        'odontologies': odontologies,
-                        'role': user.role.name
+                clinics = OdontologyUser.objects.filter(user_id=user.id).select_related('odontology')
+                for clinic in clinics:
+                    odontology = {
+                        'id': clinic.odontology.pk,
+                        'name': clinic.odontology.name,
+                        'domain_url': OdontologyDomainSerializer(
+                            OdontologyDomain.objects.filter(tenant_id=clinic.odontology.pk), many=True).data
                     }
+                    odontologies.append(odontology)
 
-                else:
-                    token_data = {
-                        'token': token.key,
-                        'role': user.role.name
-                    }
+                token_data = {
+                    'token': token.key,
+                    'user_id': user.id,
+                    'odontologies': odontologies,
+                    'role': user.role.name
+                }
 
                 return Response(token_data)
             else:
