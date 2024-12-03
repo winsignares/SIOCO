@@ -1,10 +1,12 @@
 from rest_framework.authtoken.models import Token
 from datetime import timedelta
 
+from clinic.models import Appointment
+
 SECRETARY_ID = 3
 DENTIST_ID = 2
+PATIENT_ID = 1
 PENDING_STATUS = 1
-
 
 def get_first_secretary():
     from ..models import User
@@ -59,9 +61,29 @@ def get_user_id_from_token(request):
     except Token.DoesNotExist:
         return None
 
+def get_patients_appointments(user_id: int):
+
+    if not verify_user_role(user_id, "patient"):
+        return None
+
+    try:
+        appointments = Appointment.objects.filter(user_id=user_id)
+        return appointments
+    except Appointment.DoesNotExist:
+        return []
+
+def get_user(user_id: int):
+
+    from ..models import User
+
+    try:
+        user = User.objects.get(id=user_id)
+        return user
+    except User.DoesNotExist:
+        return None
 
 def get_all_dentists(odontology_id):
-    from ..models import User, OdontologyUser
+    from ..models import User
     from shared.serializers import UserSerializer
 
     """
