@@ -20,8 +20,10 @@ from shared.utils import (
     user_has_relation_with_odontology,
     is_schema_valid,
     get_first_secretary,
+    get_schema_name,
 )
 from ..serializers import AppointmentSerializer
+from ..services import consultar_citas_view
 
 class AppointmentAPI(APIView):
     """
@@ -44,27 +46,24 @@ class AppointmentAPI(APIView):
         Returns:
             Response: A response object containing the appointment data or an error message.
         """
-        user_id = get_user_id_from_token(request)
-        if not user_id:
-            return Response({'error': 'Invalid Token or Authorization header missing'},
-                            status=status.HTTP_401_UNAUTHORIZED)
-
-        odontology_id = get_odontology_id_from_schema()
-        if not odontology_id:
-            return Response({'error': 'Odontology not found for the schema'}, status=status.HTTP_404_NOT_FOUND)
 
         if not is_schema_valid():
-            return Response({'error': 'Cannot access data with schema public context'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No se puede acceder desde el esquema principal.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if not user_has_relation_with_odontology(user_id, odontology_id):
-            return Response({'error': f'User does not have a relation with the Odontology with id {odontology_id}.'},
-                            status=status.HTTP_409_CONFLICT)
+        stream = BytesIO(request.body)
+        data = JSONParser().parse(stream)
+        print(f'data: {data}')
+
+        try:
+            patient_id = data['patient_id']
+            dentist_id = data['dentist_id']
+            secretary_id = data['secretary_id']
+            status_id = data['status_id']
+            date = data['date']
+        except KeyError:
+            return Response(status=400, data="BAD REQUEST.")
         
-        appointments_data = get_user_appointments(user_id)
-        print(f'Debug: Appointments obtenidas: {appointments_data}')
-        
-        return Response({'appointments': appointments_data}, status=status.HTTP_200_OK)
+        return Response({'appointments': consultar_citas_view(get_schema_name(), patient_id, dentist_id, secretary_id, status_id, date).data}, status=status.HTTP_200_OK)
     
     def post(self, request, *args, **kwargs):
         user_id = get_user_id_from_token(request)

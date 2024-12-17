@@ -17,6 +17,7 @@ from .schema_utils import (
     get_odontology_id_from_schema,
     user_has_relation_with_odontology,
     is_schema_valid,
+    get_schema_name,
 )
 
 from .token_utils import (

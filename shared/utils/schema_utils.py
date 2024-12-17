@@ -19,6 +19,10 @@ def get_odontology_id_from_schema():
     except Odontology.DoesNotExist:
         return None
 
+def get_schema_name():
+
+    return connection.schema_name
+
 def user_has_relation_with_odontology(user_id, odontology_id):
     
     from ..models import OdontologyUser

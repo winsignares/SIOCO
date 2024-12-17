@@ -1,1 +1,2 @@
 from .appointment_serializer import AppointmentSerializer
+from .appointment_serializer import AppointmentResultSerializer
