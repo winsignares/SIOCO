@@ -1,11 +1,11 @@
 from django.db import models
-from django.db.models import OneToOneField
 from django_tenants.models import TenantMixin, DomainMixin
 from ..utils import create_access_token
 from django.conf import settings
 
 class Odontology(TenantMixin):
     name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     exp_token = models.TextField(null=True)
