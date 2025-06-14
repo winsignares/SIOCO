@@ -1,0 +1,7 @@
+from .citas_signals import crear_estados_citas_por_defecto
+from .color_diente_estado_signals import crear_colores_por_defecto_condiciones_diente
+from .diente_estados_signals import crear_condiciones_diente_por_defecto
+from .metodos_pago_signals import crear_metodos_pago_default
+from .odontograma_signals import crear_odontograma
+from .pago_estados_signals import crear_estados_pago_defecto
+from .roles_signals import crear_roles_defecto
