@@ -3,31 +3,18 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPersonWalkingArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarAlt, faFileAlt, faReceipt, faWallet, faCreditCard, faCheckCircle, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faFileAlt, faReceipt, faWallet, faCreditCard,
+         faEye, faPersonWalkingArrowRight, faUser, faPiggyBank, 
+         faCheckCircle, faCalendarCheck, faCalendarPlus, faCalendarDays, 
+         faNoteSticky} from '@fortawesome/free-solid-svg-icons';
 
 import clsx from 'clsx';
-
 import { MenuSuperior } from './MenuSuperior';
 import useAuthStore from '../../store/authStore.js';
-
-import {
-    CalendarOutline,
-    DocumentTextOutline,
-    WalletOutline,
-    ReceiptOutline,
-    CardOutline,
-    CheckmarkCircleOutline,
-    EyeOutline,
-} from 'react-ionicons';
-
-
 
 export const Dashboard = ({ children }) => {
     const [activeLink, setActiveLink] = useState('');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-
     const navigate = useNavigate();
 
     const { isAuthenticated, role, logout, token, username } = useAuthStore(state => ({
@@ -38,20 +25,46 @@ export const Dashboard = ({ children }) => {
         username: state.username
     }));
 
+    // Definición de menús usando un solo tipo de ícono
+    const MENU_CONFIG = {
+        patient: [
+            { path: "Paciente/PSolicitarCitas", label: "Solicitar Citas", icon: faCalendarAlt },
+            { path: "Paciente/verCitas", label: "Citas", icon: faFileAlt },
+            { path: "Paciente/verOdontograma", label: "Odontogramas", icon: faReceipt },
+            { path: "Paciente/verFacturas", label: "Facturas", icon: faWallet },
+            { path: "Paciente/HacerPago", label: "Pagos", icon: faCreditCard },
+            { path: "Paciente/verHistorialMedico", label: "Historial Médico", icon: faEye }
+        ],
+        Secretaria: [
+            { path: "Secretaria/HorarioDentista", label: "Revisar Agenda", icon: faEye },
+            { path: "Secretaria/Pagos", label: "Gestionar Pagos", icon: faWallet },
+            // { path: "Secretaria/verDisponibilidad", label: "Disponibilidad", icon: faEye }
+        ],
+        dentist: [
+            { path: "dentista/verAgenda", label: "Citas", icon: faCalendarDays },
+            { path: "dentista/Calendario", label: "Calendario", icon: faCalendarPlus },
+            { path: "dentista/Nota", label: "Calendario", icon: faNoteSticky },
+        ],
+        admin: [
+            { path: "/admin/InfoUser", label: "Ver Usuarios", icon: faUser },
+            { path: "/admin/Ingresos", label: "Ver Ingresos", icon: faPiggyBank },
+            { path: "/admin/Dentistas", label: "Ver Dentistas", icon: faUser }
+        ]
+    };
+
     useEffect(() => {
-        if (role === 'Paciente') {
-            setActiveLink('PSolicitarCitas');
-            navigate('/PSolicitarCitas');
+        const defaultRoutes = {
+            // Paciente: '/PSolicitarCitas',
+            // Secretaria: '/registrarCitas',
+            // Dentista: '/verCitas'
+        };
 
-        } else if (role === 'Secretaria') {
-            setActiveLink('registrarCitas');
-            navigate('/registrarCitas');
-
-        } else if (role === 'Dentista') {
-            setActiveLink('verCitas');
-            navigate('/verCitas');
+        const defaultRoute = defaultRoutes[role];
+        if (defaultRoute) {
+            setActiveLink(defaultRoute.slice(1));
+            navigate(defaultRoute);
         }
-    }, [role]);
+    }, [role, navigate]);
 
     const handleLogout = () => {
         logout();
@@ -63,128 +76,70 @@ export const Dashboard = ({ children }) => {
         setActiveLink(link);
     };
 
-    const toggleSidebar = () => {
-        setSidebarCollapsed(!sidebarCollapsed);
-    };
-
-    const menuItemsPaciente = [
-        { path: "/PSolicitarCitas", label: "Solicitar Citas", Icon: faCalendarAlt },
-        { path: "/verCitas", label: "Citas", Icon: faFileAlt },
-        { path: "/verOdontograma", label: "Odontogramas", Icon: faReceipt },
-        { path: "/verFacturas", label: "Facturas", Icon: faWallet },
-        { path: "/HacerPago", label: "Pagos", Icon: faCreditCard },
-        { path: "/verHistorialMedico", label: "Historial Médico", Icon: faEye },
-    ];
-
-
-    const menuItemsSecretaria = [
-        { path: "/registrarCitas", label: "Registrar Citas", Icon: CalendarOutline },
-        { path: "/revisarCitas", label: "Aceptar Cita", Icon: CheckmarkCircleOutline },
-        { path: "/verDisponibilidad", label: "Disponibilidad", Icon: EyeOutline }
-    ];
-
-    const menuItemsDentista = [
-        { path: "/verCitas", label: "Citas", Icon: DocumentTextOutline },
-        { path: "/verOdontogramas", label: "Odontogramas", Icon: ReceiptOutline },
-        { path: "/verDisponibilidad", label: "Disponibilidad", Icon: EyeOutline }
-    ];
-
+    const renderMenuItem = ({ path, label, icon }) => (
+        <Link
+            key={path}
+            to={path}
+            onClick={() => handleLinkClick(path.slice(1))}
+            className={clsx(
+                'group flex items-center text-sm rounded-md py-4',
+                {
+                    'bg-indigo-800 text-white': activeLink === path.slice(1),
+                    'text-indigo-200 hover:bg-indigo-600 hover:text-white': activeLink !== path.slice(1),
+                    'px-4': sidebarCollapsed,
+                    'px-2': !sidebarCollapsed
+                }
+            )}
+        >
+            <FontAwesomeIcon
+                icon={icon}
+                className={activeLink === path.slice(1) ? 'text-white' : 'text-gray-300'}
+                size="lg"
+            />
+            <span className={`ml-2 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'
+                }`}>
+                {label}
+            </span>
+        </Link>
+    );
 
     return (
-        <div className="flex flex-col min-h-screen bg-gray-100">
-            <MenuSuperior toggleSidebar={toggleSidebar} username={username} />
+        <div className="flex flex-col h-screen bg-gray-100">
+            <MenuSuperior
+                toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+                username={username}
+            />
 
-            <div className="flex flex-1 overflow-hidden">
-                <aside className={`bg-indigo-700 transition-all duration-300 flex flex-col ${sidebarCollapsed ? 'w-16' : 'w-52'}`}>
+            <div className="flex flex-1 h-[calc(100vh-64px)]">
+                <aside className={clsx(
+                    'bg-indigo-700 h-full transition-all duration-300 flex flex-col',
+                    sidebarCollapsed ? 'w-16' : 'w-52'
+                )}>
                     <nav className="flex-grow px-2">
-
-                        {
-                            role === 'patient' && (
-                                <>
-                                    {menuItemsPaciente.map(({ path, label, Icon }) => (
-                                        <Link
-                                            key={path}
-                                            to={path}
-                                            onClick={() => handleLinkClick(path.slice(1))}
-                                            className={clsx(
-                                                'group flex items-center text-sm rounded-md py-4',
-                                                {
-                                                    'bg-indigo-800 text-white': activeLink === path.slice(1),
-                                                    'text-indigo-200 hover:bg-indigo-600 hover:text-white': activeLink !== path.slice(1),
-                                                    'px-4': sidebarCollapsed,
-                                                    'px-2': !sidebarCollapsed
-                                                }
-                                            )}
-                                        >
-                                            <FontAwesomeIcon icon={Icon} color={activeLink === path.slice(1) ? '#ffffff' : '#000'} size="lg" />
-                                            <span className={`ml-2 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>{label}</span>
-                                        </Link>
-                                    ))}
-
-
-                                </>
-                            )
-                        }
-
-                        {
-                            role === 'Secretaria' && (
-                                <>
-                                    {menuItemsSecretaria.map(({ path, label, Icon }) => (
-                                        <Link
-                                            key={path}
-                                            to={path}
-                                            onClick={() => handleLinkClick(path.slice(1))}
-                                            className={`group flex items-center px-3 text-sm rounded-md ${activeLink === path.slice(1) ? 'bg-indigo-800 text-white' : 'text-indigo-200 hover:bg-indigo-600 hover:text-white'} py-3`}
-                                        >
-                                            <Icon color={activeLink === path.slice(1) ? '#ffffff' : '#000'} height="24px" width="24px" />
-                                            <span className={`ml-2 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>{label}</span>
-                                        </Link>
-                                    ))}
-                                </>
-                            )
-                        }
-
-
-                        {
-                            role === 'Dentista' && (
-                                <>
-                                    {menuItemsDentista.map(({ path, label, Icon }) => (
-                                        <Link
-                                            key={path}
-                                            to={path}
-                                            onClick={() => handleLinkClick(path.slice(1))}
-                                            className={
-                                                `group flex items-center px-3 text-sm rounded-md ${activeLink === path.slice(1) ? 'bg-indigo-800 text-white' : 'text-indigo-200 hover:bg-indigo-600 hover:text-white'} py-3`}
-                                        >
-                                            <Icon color={activeLink === path.slice(1) ? '#ffffff' : '#000'} height="20px" width="20px" />
-                                            <span className={`ml-2 transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>{label}</span>
-                                        </Link>
-                                    ))}
-
-                                </>
-                            )
-                        }
-
+                        {MENU_CONFIG[role]?.map(renderMenuItem)}
                     </nav>
 
-                    <div className="p-4 mt-auto">
+                    <div className="p-4">
                         <button
                             type="button"
                             onClick={handleLogout}
-                            className={`flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-indigo-700 bg-white rounded-md 
-                                      hover:bg-indigo-100 ${sidebarCollapsed ? 'h-10 w-10' : ''}`}
+                            className={clsx(
+                                'flex items-center justify-center font-medium text-indigo-700 bg-white rounded-md hover:bg-indigo-100',
+                                sidebarCollapsed ? 'w-10 h-10' : 'w-full px-4 py-2'
+                            )}
                         >
-                            <FontAwesomeIcon icon={faPersonWalkingArrowRight} className={sidebarCollapsed ? 'mr-0' : 'mr-2'} />
-                            {!sidebarCollapsed && <span>Cerrar Sesión</span>}
+                            <FontAwesomeIcon
+                                icon={faPersonWalkingArrowRight}
+                                className={sidebarCollapsed ? '' : 'mr-2'}
+                            />
+                            {!sidebarCollapsed && <span>Salir</span>}
                         </button>
                     </div>
-
                 </aside>
 
-                <main className="flex-1 overflow-auto ">
+                <main className="flex-1 overflow-y-auto p-4">
                     {children}
                 </main>
-
             </div>
         </div>
     );

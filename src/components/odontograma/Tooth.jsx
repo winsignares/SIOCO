@@ -1,75 +1,63 @@
-import React, { useReducer } from 'react';
+import React from 'react';
 
-export const Tooth = ({ number, positionX, positionY, onChange }) => {
-    const initialState = {
-        center: 0,
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0
-    };
-
-    function reducer(state, action) {
-        switch (action.type) {
-            case 'toggle':
-                return { ...state, [action.zone]: state[action.zone] === 0 ? 1 : 0 };
+export const Tooth = ({ number, positionX, positionY, onChange, onZoneClick, treatments }) => {
+    const getColor = (zone) => {
+        const treatment = treatments?.[number]?.[zone];
+        switch (treatment) {
+            case 'caries':
+                return 'fill-red-500';
+            case 'restoration':
+                return 'fill-green-500';
+            case 'extraction':
+                return 'fill-purple-500';
+            case 'crown':
+                return 'fill-yellow-500';
+            case 'implant':
+                return 'fill-orange-500';
             default:
-                return state;
+                return 'fill-white';
         }
-    }
-
-    const [state, dispatch] = useReducer(reducer, initialState);
+    };
 
     const handleClick = (zone) => {
-        dispatch({ type: 'toggle', zone });
-        onChange(number, { ...state, [zone]: state[zone] === 0 ? 1 : 0 });
-    };
-
-    const getColor = (zone) => {
-        return state[zone] === 1 ? 'fill-blue-500' : 'fill-white';
+        onZoneClick(number, zone);
     };
 
     const translate = `translate(${positionX},${positionY})`;
 
     return (
-        <svg className="tooth">
+        <svg className='tooth ' >
+
             <g transform={translate}>
                 <polygon
                     points="0,0 20,0 15,5 5,5"
-                    onClick={() => handleClick('top')}
-                    className={`border ${getColor('top')}`}
+                    onClick={() => handleClick('arriba')}
+                    className={`border cursor-pointer hover:fill-gray-200 ${getColor('arriba')}`}
                 />
                 <polygon
                     points="5,15 15,15 20,20 0,20"
-                    onClick={() => handleClick('bottom')}
-                    className={`border ${getColor('bottom')}`}
+                    onClick={() => handleClick('abajo')}
+                    className={`border cursor-pointer hover:fill-gray-200 ${getColor('abajo')}`}
                 />
                 <polygon
                     points="15,5 20,0 20,20 15,15"
-                    onClick={() => handleClick('left')}
-                    className={`border ${getColor('left')}`}
+                    onClick={() => handleClick('izquierda')}
+                    className={`border cursor-pointer hover:fill-gray-200 ${getColor('izquierda')}`}
                 />
                 <polygon
                     points="0,0 5,5 5,15 0,20"
-                    onClick={() => handleClick('right')}
-                    className={`border ${getColor('right')}`}
+                    onClick={() => handleClick('derecha')}
+                    className={`border cursor-pointer hover:fill-gray-200 ${getColor('derecha')}`}
                 />
                 <polygon
                     points="5,5 15,5 15,15 5,15"
-                    onClick={() => handleClick('center')}
-                    className={`border ${getColor('center')}`}
+                    onClick={() => handleClick('centro')}
+                    className={`border cursor-pointer hover:fill-gray-200 ${getColor('centro')}`}
                 />
-                <text
-                    x="6"
-                    y="30"
-                    stroke="navy"
-                    fill="navy"
-                    strokeWidth="0.1"
-                    className="tooth">
-                    {/* {number} */}
+                <text x="0" y="40" stroke="navy" fill="navy" strokeWidth="0.1" className="tooth">
+                    {number}
                 </text>
             </g>
         </svg>
     );
-}
-
+};

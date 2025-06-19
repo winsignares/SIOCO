@@ -14,39 +14,39 @@ export const App = () => {
   const [filteredOdontologies, setFilteredOdontologies] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    if (isAuthenticated && odontologies.length > 1) {
-      const filtered = odontologies.filter((odont) => odont.name !== 'public');
-      setFilteredOdontologies(filtered);
+  // useEffect(() => {
+  //   if (isAuthenticated && odontologies.length > 1) {
+  //     const filtered = odontologies.filter((odont) => odont.name !== 'public');
+  //     setFilteredOdontologies(filtered);
 
-      // Verifica si el modal ya fue mostrado anteriormente
-      const modalShown = localStorage.getItem('odontologiaModalShown');
+  //     // Verifica si el modal ya fue mostrado anteriormente
+  //     const modalShown = localStorage.getItem('odontologiaModalShown');
 
-      if (modalShown== "false" ) {
-        setShowModal(true);
-      } else if (filtered.length === 1) {
-        setUrlSecundaria(filtered[0].domain_url);
-      }
-    }
-  }, [isAuthenticated, odontologies, setUrlSecundaria]);
+  //     if (modalShown== "false" ) {
+  //       setShowModal(true);
+  //     } else if (filtered.length === 1) {
+  //       setUrlSecundaria(filtered[0].domain_url);
+  //     }
+  //   }
+  // }, [isAuthenticated, odontologies, setUrlSecundaria]);
 
-  const handleSelectOdontologia = (url) => {
-    setUrlSecundaria(url);
-    setShowModal(false);
+  // const handleSelectOdontologia = (url) => {
+  //   setUrlSecundaria(url);
+  //   setShowModal(false);
 
-    // Almacena en localStorage que el modal ya fue mostrado
-    localStorage.setItem('odontologiaModalShown', 'true');
-  };
+  //   // Almacena en localStorage que el modal ya fue mostrado
+  //   localStorage.setItem('odontologiaModalShown', 'true');
+  // };
 
   if (isAuthenticated) {
     return (
       <>
-        {showModal && (
+        {/* {showModal && (
           <OdontologiaModal
             odontologies={filteredOdontologies}
             onSelect={handleSelectOdontologia}
           />
-        )}
+        ) } */}
         <DashboardRoutes />
       </>
     );

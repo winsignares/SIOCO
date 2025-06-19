@@ -1,26 +1,32 @@
-import { Dashboard, SolicitarCitas, Citas, HistorialMedico, Pagos, Facturas, Factura, RegiCitas, RevisarCitas, Odontograma, Spinner } from "../components"
-import { Routes, Route, Navigate } from "react-router-dom"
+
+import { Routes, Route } from "react-router-dom"
+
+import { Dashboard,Spinner } from "../components"
+
+import { AmdRoutes } from "../Admin/routes/AmdRoutes";
+import { DentRoutes } from "../Dentista";
+import { SecRouter } from "../Secretaria";
+import { PacienteRouter } from "../Paciente";
 
 export const DashboardRoutes = () => {
     return (
         <Dashboard>
             <Routes>
-
-                {/* Rutas del paciente */}
-                <Route path="/PSolicitarCitas" element={<SolicitarCitas />} />
-                <Route path="/verCitas" element={<Citas />} />
-                <Route path="/verHistorialMedico" element={<HistorialMedico />} />
-                <Route path="/HacerPago" element={<Pagos />} />
-                <Route path="/verFacturas" element={<Facturas />} />
-                <Route path="/verFacturas/:id" element={<Factura />} />
-                <Route path="/verOdontograma" element={<Odontograma />} />
-
+                
+                { /* Rutas del Paciente */}
+                <Route path="/Paciente/*" element={<PacienteRouter />} />
 
                 {/* Rutas de la Secretaria */}
-                <Route path="/registrarCitas" element={<RegiCitas />} />
-                <Route path="/revisarCitas" element={<RevisarCitas />} />
+                <Route path="/Secretaria/*" element={<SecRouter />} />
+                
+                {/* Rutas del Dentista */}
+                <Route path="/dentista/*" element={<DentRoutes />} />
 
-                <Route path="*" element={ <Spinner /> } />
+                {/* Rutas del Administrador */}
+                <Route path="/admin/*" element={<AmdRoutes />} />
+
+                <Route path="*" element={<Spinner />} />
+
 
             </Routes>
         </Dashboard>

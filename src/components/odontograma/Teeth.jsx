@@ -1,43 +1,41 @@
 import { Tooth } from "./Tooth";
 
+export const Teeth = ({ start, end, x, y, handleChange, onZoneClick, treatments }) => {
+  const tooths = getArray(start, end);
 
-
-export const Teeth = ({ start, end, x, y, handleChange }) => {
-    const tooths = getArray(start, end);
-
-    return (
-        <g transform="scale(1.4)" id="gmain" className="">
-            {tooths.map(i => (
-                <Tooth
-                    onChange={handleChange}
-                    key={i}
-                    number={i}
-                    positionY={y}
-                    positionX={Math.abs((i - start) * 25) + x}
-                />
-            ))}
-        </g>
-    )
-}
-
+  return (
+    <g id="gmain">
+      {tooths.map((i, index) => (
+        <Tooth
+          onChange={handleChange}
+          key={i}
+          number={i}
+          positionY={y}
+          positionX={x + index * 30}
+          onZoneClick={onZoneClick}
+          treatments={treatments}
+        />
+      ))}
+    </g>
+  );
+};
 
 function getArray(start, end) {
-    if (start > end) return getInverseArray(start, end);
+  if (start > end) return getInverseArray(start, end);
 
-    let list = [];
-    for (let i = start; i <= end; i++) {
-        list.push(i);
-    }
+  let list = [];
+  for (let i = start; i <= end; i++) {
+    list.push(i);
+  }
 
-    return list;
+  return list;
 }
 
 function getInverseArray(start, end) {
-    let list = [];
+  let list = [];
+  for (let i = start; i >= end; i--) {
+    list.push(i);
+  }
 
-    for (let i = start; i >= end; i--) {
-        list.push(i);
-    }
-
-    return list;
+  return list;
 }
